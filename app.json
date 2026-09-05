@@ -8,7 +8,10 @@
     "scheme": "cmcapp",
     "userInterfaceStyle": "automatic",
     "ios": {
-      "icon": "./assets/expo.icon"
+      "icon": "./assets/expo.icon",
+      "infoPlist": {
+        "NSCameraUsageDescription": "$(PRODUCT_NAME) needs access to your camera "
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -17,7 +20,9 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "predictiveBackGestureEnabled": false
+      "permissions": ["android.permission.CAMERA"],
+      "predictiveBackGestureEnabled": false,
+      "package": "com.juwon33.cmcapp"
     },
     "web": {
       "output": "static",
@@ -32,11 +37,26 @@
           "image": "./assets/images/splash-icon.png",
           "imageWidth": 76
         }
-      ]
+      ],
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "minSdkVersion": 26
+          }
+        }
+      ],
+      "react-native-fast-tflite"
     ],
     "experiments": {
       "typedRoutes": true,
       "reactCompiler": true
+    },
+    "extra": {
+      "router": {},
+      "eas": {
+        "projectId": "727a91cc-c75c-44e7-9295-7805a1bb16ce"
+      }
     }
   }
 }
