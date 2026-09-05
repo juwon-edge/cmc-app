@@ -12,6 +12,17 @@ export type ModelInfo = {
   isQuantized: boolean;
 };
 
+type QuantizationValue = { scale: number; zeroPoint: number };
+
+export interface ModelMetadata {
+  quantization: {
+    input: QuantizationValue;
+    output: QuantizationValue;
+  };
+  normalised: boolean;
+  classes: string[];
+}
+
 export type Prediction = {
   label: string;
   index: number;

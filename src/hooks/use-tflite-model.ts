@@ -1,3 +1,5 @@
+import { dataTypeToArrayTypeMap, isAllowedDataType } from "@/utils/helper";
+import { ModelMetadata } from "@/utils/types";
 import { useCallback } from "react";
 import { Platform } from "react-native";
 import {
@@ -5,67 +7,101 @@ import {
   useTensorflowModel,
 } from "react-native-fast-tflite";
 import { Frame } from "react-native-vision-camera";
-import { DataType, useResizer } from "react-native-vision-camera-resizer";
+import { useResizer } from "react-native-vision-camera-resizer";
 
 type Props = {
   modelPath: string;
+  modelMetadata: ModelMetadata;
   useGpu: boolean;
-};
-const allowedDataTypes = ["int8", "uint8", "float32", "float16"] as const;
-type AllowedDataTypes = typeof allowedDataTypes;
-
-const isAllowedDataType = (value: unknown): value is AllowedDataTypes => {
-  return allowedDataTypes.some((dataType) => dataType === value);
 };
 
 const hostIsAndroid = Platform.OS === "android";
 
-const useClassificationModel = ({ modelPath, useGpu = false }: Props) => {
+const useTFLiteModel = ({
+  modelPath,
+  modelMetadata,
+  useGpu = false,
+}: Props) => {
   const delegate: TensorflowModelDelegate[] = useGpu
     ? [hostIsAndroid ? "android-gpu" : "core-ml"]
     : [];
   const { model, state } = useTensorflowModel(require(modelPath), delegate);
-
-  const inputTensor = model?.inputs[0];
-  const outputTensor = model?.outputs[0];
+  // const dequantizedOuputArray = useMemo(() => {
+  //   if (!model) return new Float32Array();
+  //   const output_shape = model.outputs[0].shape;
+  //   const output_size = output_shape.reduce(
+  //     (prev, current) => prev * current,
+  //     1,
+  //   );
+  //   return new Float32Array(output_size);
+  // }, []);
 
   const {
     resizer,
     state: resizerState,
     error,
   } = useResizer({
-    height: inputTensor?.shape[1] ?? 0,
-    width: inputTensor?.shape[2] ?? 0,
+    height: model?.inputs[0].shape[1] ?? 0,
+    width: model?.inputs[0].shape[2] ?? 0,
     channelOrder: "rgb",
-    dataType: isAllowedDataType(inputTensor?.dataType)
-      ? (inputTensor.dataType as DataType)
-      : "int8",
+    dataType: "uint8",
     scaleMode: "contain",
     pixelLayout: "interleaved",
   });
 
-  if (inputTensor && !isAllowedDataType(inputTensor.dataType))
-    throw new Error("Unsupported input data type");
-  if (outputTensor && !isAllowedDataType(outputTensor.dataType))
-    throw new Error("Unsupported output data type");
-
   const isReady = state !== "loaded" || resizerState !== "ready";
 
-  const runInference = useCallback((frame: Frame) => {
+  const runInference = useCallback((frame: Frame, disposeFrame = true) => {
     if (!resizer || !model) throw new Error("model not initialised");
+
+    const inputTensor = model.inputs[0];
+    const outputTensor = model.outputs[0];
+    const modelQuantized =
+      inputTensor.dataType === "uint8" || inputTensor.dataType === "int8";
+
+    if (!isAllowedDataType(inputTensor.dataType))
+      throw new Error("Unsupported input data type");
+    if (!isAllowedDataType(outputTensor.dataType))
+      throw new Error("Unsupported output data type");
+
     const resizedFrame = resizer.resize(frame);
-    const output = model.runSync([resizedFrame.getPixelBuffer()]);
-
-    switch (outputTensor?.dataType) {
-      case "float32":
-        return new Float32Array(output[0]);
-      case "float16":
-        return new Float16Array(output[0]);
-      default:
-        return new Int8Array(output[0]);
+    if (disposeFrame) frame.dispose();
+    const sharedBufferArray = new Uint8Array(resizedFrame.getPixelBuffer());
+    const InputDataArray = dataTypeToArrayTypeMap(inputTensor.dataType);
+    let pixelArray;
+    if (modelQuantized) {
+      // Quantized model
+      pixelArray = new InputDataArray(sharedBufferArray.length);
+      const scale = modelMetadata.normalised
+        ? modelMetadata.quantization.input.scale * 255
+        : modelMetadata.quantization.input.scale;
+      const zeroPoint = modelMetadata.quantization.input.zeroPoint;
+      for (let index = 0; index < sharedBufferArray.length; index++)
+        pixelArray[index] = Math.round(
+          sharedBufferArray[index] / scale + zeroPoint,
+        );
+    } else {
+      pixelArray = new InputDataArray(sharedBufferArray);
+      if (modelMetadata.normalised)
+        for (let index = 0; index < pixelArray.length; index++)
+          pixelArray[index] /= 255.0;
     }
-  }, []);
+    resizedFrame.dispose();
+    const output = model.runSync([pixelArray.buffer]);
+    const OutputDataArray = dataTypeToArrayTypeMap(outputTensor.dataType);
+    const rawOutputArray = new OutputDataArray(output[0]);
+    if (modelQuantized) {
+      const dequantizedOuputArray = new Float32Array(rawOutputArray.length);
+      const scale = modelMetadata.quantization.output.scale;
+      const zeroPoint = modelMetadata.quantization.output.zeroPoint;
+      for (let index = 0; index < rawOutputArray.length; index++)
+        dequantizedOuputArray[index] =
+          (rawOutputArray[index] - zeroPoint) * scale;
+      return dequantizedOuputArray;
+    }
 
+    return rawOutputArray;
+  }, []);
   return {
     model,
     isReady,
@@ -74,4 +110,4 @@ const useClassificationModel = ({ modelPath, useGpu = false }: Props) => {
   };
 };
 
-export default useClassificationModel;
+export default useTFLiteModel;

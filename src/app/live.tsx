@@ -4,9 +4,7 @@ import { useEffect } from "react";
 import { Button, StyleSheet } from "react-native";
 import { Camera, useCameraPermission } from "react-native-vision-camera";
 
-type Props = {};
-
-const video = (props: Props) => {
+const LiveVideoFeed = () => {
   const { hasPermission, requestPermission } = useCameraPermission();
 
   useEffect(() => {
@@ -34,7 +32,7 @@ const video = (props: Props) => {
   );
 };
 
-export default video;
+export default LiveVideoFeed;
 
 const styles = StyleSheet.create({
   permissionContainer: {
