@@ -7,7 +7,7 @@ export interface BoundingBox {
   width: number
   height: number
   confidence: number
-  classId: string
+  classId: number
 }
 
 export interface TrackedObject {
@@ -23,7 +23,6 @@ export interface BoTSortTracker extends HybridObject<{
   ios: 'c++'
   android: 'c++'
 }> {
-  initialize(reidModelPath: string): void
-  // Passing the zero-copy host Frame directly into the C++ runtime
+  initialize(reidModelPath: string, useGpu: boolean): void
   updateWithFrame(frame: Frame, detections: BoundingBox[]): TrackedObject[]
 }

@@ -2,14 +2,30 @@ import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
 import { useEffect } from "react";
 import { Button, StyleSheet } from "react-native";
-import { Camera, useCameraPermission } from "react-native-vision-camera";
+import { BoTSort } from "react-native-botsort";
+import {
+  Camera,
+  useCameraDevice,
+  useCameraPermission,
+  useFrameProcessor,
+} from "react-native-vision-camera";
 
 const LiveVideoFeed = () => {
   const { hasPermission, requestPermission } = useCameraPermission();
+  const device = useCameraDevice("back");
+
+  const frameProcessor = useFrameProcessor((frame) => {
+    "worklet";
+    BoTSort.updateWithFrame(frame, []);
+  }, []);
 
   useEffect(() => {
     if (!hasPermission) requestPermission();
   }, [hasPermission]);
+
+  useEffect(() => {
+    BoTSort.initialize("", false);
+  }, []);
 
   if (!hasPermission) {
     return (
@@ -25,9 +41,18 @@ const LiveVideoFeed = () => {
     );
   }
 
+  if (device == null) {
+    return null;
+  }
+
   return (
     <ThemedView style={styles.container}>
-      <Camera style={StyleSheet.absoluteFill} isActive={true} device="back" />
+      <Camera
+        style={StyleSheet.absoluteFill}
+        device={device}
+        isActive={true}
+        frameProcessor={frameProcessor}
+      />
     </ThemedView>
   );
 };
