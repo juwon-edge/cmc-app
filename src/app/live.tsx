@@ -7,17 +7,11 @@ import {
   Camera,
   useCameraDevice,
   useCameraPermission,
-  useFrameProcessor,
 } from "react-native-vision-camera";
 
 const LiveVideoFeed = () => {
   const { hasPermission, requestPermission } = useCameraPermission();
   const device = useCameraDevice("back");
-
-  const frameProcessor = useFrameProcessor((frame) => {
-    "worklet";
-    BoTSort.updateWithFrame(frame, []);
-  }, []);
 
   useEffect(() => {
     if (!hasPermission) requestPermission();
@@ -47,12 +41,7 @@ const LiveVideoFeed = () => {
 
   return (
     <ThemedView style={styles.container}>
-      <Camera
-        style={StyleSheet.absoluteFill}
-        device={device}
-        isActive={true}
-        frameProcessor={frameProcessor}
-      />
+      <Camera style={StyleSheet.absoluteFill} device={device} isActive={true} />
     </ThemedView>
   );
 };
