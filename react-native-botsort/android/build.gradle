@@ -102,8 +102,22 @@ android {
 
   buildTypes {
     release {
-      minifyEnabled false
-    }
+          minifyEnabled true
+          shrinkResources true
+          proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
+
+          // CRITICAL NATIVE STRIPPING
+          ndk {
+              debugSymbolLevel = 'NONE' // Wipes massive native C++ symbol charts
+          }
+          externalNativeBuild {
+              cmake {
+                  // Enables Link-Time Optimization (LTO) to eliminate dead C++ functions
+                  arguments "-DCMAKE_BUILD_TYPE=Release", "-DANDROID_CPP_FEATURES=rtti exceptions"
+                  cppFlags "-flto", "-fvisibility=hidden", "-fdata-sections", "-ffunction-sections"
+              }
+            }
+        }     
   }
 
   lintOptions {
@@ -113,26 +127,6 @@ android {
   compileOptions {
     sourceCompatibility JavaVersion.VERSION_1_8
     targetCompatibility JavaVersion.VERSION_1_8
-  }
-
-  boottype {
-        release {
-            minifyEnabled true
-            shrinkResources true
-            proguardFiles getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro"
-
-            // CRITICAL NATIVE STRIPPING
-            ndk {
-                debugSymbolLevel = 'NONE' // Wipes massive native C++ symbol charts
-            }
-            externalNativeBuild {
-                cmake {
-                    // Enables Link-Time Optimization (LTO) to eliminate dead C++ functions
-                    arguments "-DCMAKE_BUILD_TYPE=Release", "-DANDROID_CPP_FEATURES=rtti exceptions"
-                    cppFlags "-flto", "-fvisibility=hidden", "-fdata-sections", "-ffunction-sections"
-                }
-              }
-          }            
   }
 
   splits {

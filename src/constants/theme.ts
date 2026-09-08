@@ -2,6 +2,15 @@ import "@/global.css";
 
 import { Platform } from "react-native";
 
+export const C = {
+  ground: "#F4F1EC",
+  surface: "#EDE9E2",
+  border: "#E0DDD6",
+  ink: "#1C1A17",
+  muted: "#8A8780",
+  faint: "#C8C4BC",
+};
+
 export const Colors = {
   light: {
     text: "#000000",

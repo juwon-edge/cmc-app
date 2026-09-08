@@ -18,7 +18,7 @@ export interface ModelMetadata {
   quantization: {
     input: QuantizationValue;
     output: QuantizationValue;
-  };
+  } | null;
   normalised: boolean;
   classes: string[];
 }

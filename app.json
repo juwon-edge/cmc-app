@@ -1,6 +1,6 @@
 {
   "expo": {
-    "name": "cmc-app",
+    "name": "MotoSpot",
     "slug": "cmc-app",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -10,8 +10,10 @@
     "ios": {
       "icon": "./assets/expo.icon",
       "infoPlist": {
-        "NSCameraUsageDescription": "$(PRODUCT_NAME) needs access to your camera "
-      }
+        "NSCameraUsageDescription": "$(PRODUCT_NAME) needs access to your camera ",
+        "ITSAppUsesNonExemptEncryption": false
+      },
+      "bundleIdentifier": "com.juwon33.cmcapp"
     },
     "android": {
       "adaptiveIcon": {
@@ -20,7 +22,9 @@
         "backgroundImage": "./assets/images/android-icon-background.png",
         "monochromeImage": "./assets/images/android-icon-monochrome.png"
       },
-      "permissions": ["android.permission.CAMERA"],
+      "permissions": [
+        "android.permission.CAMERA"
+      ],
       "predictiveBackGestureEnabled": false,
       "package": "com.juwon33.cmcapp"
     },

@@ -1,47 +1,38 @@
-import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
-import { useEffect } from "react";
-import { Button, StyleSheet } from "react-native";
+import { useEffect, useState } from "react";
+import { StyleSheet } from "react-native";
 import { BoTSort } from "react-native-botsort";
 import {
   Camera,
+  type TargetCameraPosition,
   useCameraDevice,
-  useCameraPermission,
+  useFrameOutput,
 } from "react-native-vision-camera";
 
 const LiveVideoFeed = () => {
-  const { hasPermission, requestPermission } = useCameraPermission();
-  const device = useCameraDevice("back");
-
-  useEffect(() => {
-    if (!hasPermission) requestPermission();
-  }, [hasPermission]);
+  const [targetCamera, setTargetCamera] =
+    useState<TargetCameraPosition>("back");
+  const device = useCameraDevice(targetCamera);
+  const frameOutput = useFrameOutput({
+    targetResolution: { width: 320, height: 640 },
+    pixelFormat: "yuv",
+    onFrame(frame) {},
+  });
 
   useEffect(() => {
     BoTSort.initialize("", false);
   }, []);
 
-  if (!hasPermission) {
-    return (
-      <ThemedView style={styles.permissionContainer}>
-        <ThemedText style={styles.text}>
-          Camera permission is required
-        </ThemedText>
-        {/* <Pressable onPress={requestPermission}>
-          <ThemedText>Allow Camera</ThemedText>
-        </Pressable> */}
-        <Button title="Allow Camera" onPress={requestPermission} />
-      </ThemedView>
-    );
-  }
-
-  if (device == null) {
-    return null;
-  }
+  if (device == null) return null;
 
   return (
     <ThemedView style={styles.container}>
-      <Camera style={StyleSheet.absoluteFill} device={device} isActive={true} />
+      <Camera
+        style={StyleSheet.absoluteFill}
+        device={device}
+        isActive={true}
+        outputs={[frameOutput]}
+      />
     </ThemedView>
   );
 };
@@ -49,12 +40,6 @@ const LiveVideoFeed = () => {
 export default LiveVideoFeed;
 
 const styles = StyleSheet.create({
-  permissionContainer: {
-    flex: 1,
-    justifyContent: "center",
-    alignItems: "center",
-  },
-  text: { fontSize: 18, marginBottom: 20 },
   container: {
     flex: 1,
   },

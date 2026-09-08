@@ -1,8 +1,13 @@
-import { dataTypeToArrayTypeMap, isAllowedDataType } from "@/utils/helper";
+import {
+  clamp,
+  dataTypeToArrayTypeMap,
+  isAllowedDataType,
+} from "@/utils/helper";
 import { ModelMetadata } from "@/utils/types";
 import { useCallback } from "react";
 import { Platform } from "react-native";
 import {
+  ModelSource,
   TensorflowModelDelegate,
   useTensorflowModel,
 } from "react-native-fast-tflite";
@@ -10,22 +15,22 @@ import { Frame } from "react-native-vision-camera";
 import { useResizer } from "react-native-vision-camera-resizer";
 
 type Props = {
-  modelPath: string;
+  modelSource: ModelSource;
   modelMetadata: ModelMetadata;
-  useGpu: boolean;
+  useGpu?: boolean;
 };
 
 const hostIsAndroid = Platform.OS === "android";
 
 const useTFLiteModel = ({
-  modelPath,
+  modelSource,
   modelMetadata,
   useGpu = false,
 }: Props) => {
   const delegate: TensorflowModelDelegate[] = useGpu
     ? [hostIsAndroid ? "android-gpu" : "core-ml"]
     : [];
-  const { model, state } = useTensorflowModel(require(modelPath), delegate);
+  const { model, state } = useTensorflowModel(modelSource, delegate);
   // const dequantizedOuputArray = useMemo(() => {
   //   if (!model) return new Float32Array();
   //   const output_shape = model.outputs[0].shape;
@@ -76,10 +81,19 @@ const useTFLiteModel = ({
         ? modelMetadata.quantization.input.scale * 255
         : modelMetadata.quantization.input.scale;
       const zeroPoint = modelMetadata.quantization.input.zeroPoint;
-      for (let index = 0; index < sharedBufferArray.length; index++)
-        pixelArray[index] = Math.round(
-          sharedBufferArray[index] / scale + zeroPoint,
-        );
+      if (inputTensor.dataType === "int8") {
+        for (let index = 0; index < sharedBufferArray.length; index++)
+          pixelArray[index] = clamp(
+            -128,
+            127,
+            Math.round(sharedBufferArray[index] / scale + zeroPoint),
+          );
+      } else {
+        for (let index = 0; index < sharedBufferArray.length; index++)
+          pixelArray[index] = Math.round(
+            sharedBufferArray[index] / scale + zeroPoint,
+          );
+      }
     } else {
       pixelArray = new InputDataArray(sharedBufferArray);
       if (modelMetadata.normalised)
