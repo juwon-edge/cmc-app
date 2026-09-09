@@ -1,8 +1,0 @@
-{
-  "editor.codeActionsOnSave": {
-    "source.fixAll": "explicit",
-    "source.organizeImports": "explicit",
-    "source.sortMembers": "explicit"
-  },
-  "cmake.sourceDirectory": "C:/Users/HP/projects/Embedded/cmc-app/react-native-botsort/android"
-}
