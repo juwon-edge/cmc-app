@@ -1,3 +1,4 @@
+import ImagePicker from "@/components/image-picker-btn";
 import RotateCamBtn from "@/components/rotate-cam-btn";
 import { C } from "@/constants/theme";
 import useCameraDevice from "@/hooks/use-camera-device";
@@ -7,14 +8,16 @@ import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Camera } from "react-native-vision-camera";
+import { Camera, usePhotoOutput } from "react-native-vision-camera";
 
 SplashScreen.preventAutoHideAsync();
+
 export default function Index() {
   const classificationModel = useClassificationModel();
   const detectionModel = useDetectionnModel();
   const [device, setCameraPosition] = useCameraDevice("back");
   const [mounted, setMounted] = useState(false);
+  const l = usePhotoOutput();
 
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 30);
@@ -33,41 +36,55 @@ export default function Index() {
       <Camera style={StyleSheet.absoluteFill} device={device} isActive />
 
       <SafeAreaView
+        className="absolute z-10 bottom-12 justify-center"
         style={{
           opacity: mounted ? 1 : 0,
           transform: mounted ? "none" : "translateY(12px)",
-          transition: "opacity 0.5s 0.2s, transform 0.5s 0.2s",
+          transitionProperty: ["opacity", "transform"],
+          transitionDuration: 0.5,
+          transitionDelay: "0.2s",
         }}
       >
-        <Pressable
-          onPress={trigger}
-          className="w-11 h-11 rounded-full flex items-center justify-center border transition-all active:scale-90"
-          style={{ borderColor: C.border }}
-        ></Pressable>
+        <ImagePicker
+          onImagePicked={(pickedImage) => {
+            console.log(pickedImage.uri);
+          }}
+        />
 
-        <View className="relative flex items-center justify-center">
+        <View className="flex items-center justify-center">
           <View
             className="absolute rounded-full"
             style={{
               width: 72,
               height: 72,
-              border: `1px solid ${C.ink}`,
-              animation: "pulse-ring 2s ease-out infinite",
+              borderColor: C.ink,
+              borderWidth: 1,
+              borderStyle: "solid",
+              animationName: "pulse-ring",
+              animationDuration: 2,
+              animationDirection: "ease-out",
+              animationTimingFunction: "infinite",
             }}
           />
           <Pressable
-            onPress={trigger}
-            className="relative rounded-full flex items-center justify-center active:scale-90 transition-transform"
-            style={{ width: 72, height: 72, border: `1.5px solid ${C.ink}` }}
+            onPress={() => {}}
+            className="rounded-full flex items-center justify-center active:scale-90 transition-transform"
+            style={{
+              width: 72,
+              height: 72,
+              borderColor: C.ink,
+              borderStyle: "solid",
+              borderWidth: 1.5,
+            }}
           >
             <View
               className="rounded-full"
-              style={{ width: 54, height: 54, background: C.ink }}
+              style={{ width: 54, height: 54, backgroundColor: C.ink }}
             />
           </Pressable>
-
-          <RotateCamBtn setCameraPosition={setCameraPosition} />
         </View>
+
+        <RotateCamBtn setCameraPosition={setCameraPosition} />
       </SafeAreaView>
     </View>
   );

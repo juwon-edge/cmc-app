@@ -1,5 +1,4 @@
 import useTFLiteModel from "@/hooks/use-tflite-model";
-import { ModelMetadata } from "@/utils/types";
 import { createContext } from "react";
 
 type UseTFLiteModelReturnType = ReturnType<typeof useTFLiteModel>;
@@ -13,7 +12,11 @@ const ClassificationModelProvider = ({
 }) => {
   const model = useTFLiteModel({
     modelSource: require("@/assets/models/car_classifier_v1(int8).tflite"),
-    modelMetadata: {} as ModelMetadata,
+    modelMetadata: {
+      quantization: null,
+      normalised: false,
+      classes: [],
+    },
   });
   return (
     <ClassificationModelContext value={model}>

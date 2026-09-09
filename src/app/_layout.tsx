@@ -1,3 +1,4 @@
+import "@/global.css";
 import AppTab from "@/components/app-tabs";
 import { ThemedText } from "@/components/themed-text";
 import { ThemedView } from "@/components/themed-view";
@@ -14,7 +15,7 @@ export default function RootLayout() {
 
   useEffect(() => {
     if (!hasPermission) requestPermission();
-  }, [hasPermission]);
+  }, [hasPermission, requestPermission]);
 
   return (
     <ThemeProvider value={colorScheme === "dark" ? DarkTheme : DefaultTheme}>

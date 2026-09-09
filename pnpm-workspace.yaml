@@ -1,3 +1,6 @@
 packages:
-  - "."
-  - "react-native-botsort"
+  - .
+  - react-native-botsort
+
+onlyBuiltDependencies:
+  - unrs-resolver
