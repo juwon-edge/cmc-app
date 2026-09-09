@@ -74,7 +74,7 @@ const useTFLiteModel = ({
     const sharedBufferArray = new Uint8Array(resizedFrame.getPixelBuffer());
     const InputDataArray = dataTypeToArrayTypeMap(inputTensor.dataType);
     let pixelArray;
-    if (modelQuantized) {
+    if (modelQuantized && modelMetadata.quantization) {
       // Quantized model
       pixelArray = new InputDataArray(sharedBufferArray.length);
       const scale = modelMetadata.normalised
@@ -104,7 +104,7 @@ const useTFLiteModel = ({
     const output = model.runSync([pixelArray.buffer]);
     const OutputDataArray = dataTypeToArrayTypeMap(outputTensor.dataType);
     const rawOutputArray = new OutputDataArray(output[0]);
-    if (modelQuantized) {
+    if (modelQuantized && modelMetadata.quantization) {
       const dequantizedOuputArray = new Float32Array(rawOutputArray.length);
       const scale = modelMetadata.quantization.output.scale;
       const zeroPoint = modelMetadata.quantization.output.zeroPoint;

@@ -1,16 +1,16 @@
-import { StyleSheet, Text, View } from "react-native";
-import React from "react";
+import { Image } from "expo-image";
+import { StyleSheet, View } from "react-native";
 
-type Props = {};
-
-const info = (props: Props) => {
+const info = () => {
   return (
-    <View>
-      <Text>info</Text>
+    <View style={styles.container}>
+      <Image />
     </View>
   );
 };
 
 export default info;
 
-const styles = StyleSheet.create({});
+const styles = StyleSheet.create({
+  container: { flex: 1 },
+});

@@ -1,10 +1,12 @@
+import RotateCamBtn from "@/components/rotate-cam-btn";
+import { C } from "@/constants/theme";
 import useCameraDevice from "@/hooks/use-camera-device";
 import useClassificationModel from "@/hooks/use-classification-model";
 import useDetectionnModel from "@/hooks/use-detection-model";
 import * as SplashScreen from "expo-splash-screen";
-import {} from "expo-system-ui";
 import { useEffect, useState } from "react";
-import { StyleSheet, View } from "react-native";
+import { Pressable, StyleSheet, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { Camera } from "react-native-vision-camera";
 
 SplashScreen.preventAutoHideAsync();
@@ -30,7 +32,7 @@ export default function Index() {
     <View style={styles.container}>
       <Camera style={StyleSheet.absoluteFill} device={device} isActive />
 
-      {/* <SafeAreaView
+      <SafeAreaView
         style={{
           opacity: mounted ? 1 : 0,
           transform: mounted ? "none" : "translateY(12px)",
@@ -43,7 +45,6 @@ export default function Index() {
           style={{ borderColor: C.border }}
         ></Pressable>
 
-      
         <View className="relative flex items-center justify-center">
           <View
             className="absolute rounded-full"
@@ -64,10 +65,10 @@ export default function Index() {
               style={{ width: 54, height: 54, background: C.ink }}
             />
           </Pressable>
-        </View>
 
-        <View style={{ width: 44 }} />
-      </SafeAreaView> */}
+          <RotateCamBtn setCameraPosition={setCameraPosition} />
+        </View>
+      </SafeAreaView>
     </View>
   );
 }

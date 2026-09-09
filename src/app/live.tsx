@@ -1,22 +1,23 @@
+import RotateCamBtn from "@/components/rotate-cam-btn";
 import { ThemedView } from "@/components/themed-view";
-import { useEffect, useState } from "react";
+import useCameraDevice from "@/hooks/use-camera-device";
+import useDetectionnModel from "@/hooks/use-detection-model";
+import { useEffect } from "react";
 import { StyleSheet } from "react-native";
 import { BoTSort } from "react-native-botsort";
-import {
-  Camera,
-  type TargetCameraPosition,
-  useCameraDevice,
-  useFrameOutput,
-} from "react-native-vision-camera";
+import { Camera, useFrameOutput } from "react-native-vision-camera";
 
 const LiveVideoFeed = () => {
-  const [targetCamera, setTargetCamera] =
-    useState<TargetCameraPosition>("back");
-  const device = useCameraDevice(targetCamera);
+  const [device, setCameraPosition] = useCameraDevice("back");
+  const detectionModel = useDetectionnModel();
+
   const frameOutput = useFrameOutput({
     targetResolution: { width: 320, height: 640 },
     pixelFormat: "yuv",
-    onFrame(frame) {},
+    onFrame(frame) {
+      const output = detectionModel.runInference(frame);
+      console.log(output);
+    },
   });
 
   useEffect(() => {
@@ -27,6 +28,7 @@ const LiveVideoFeed = () => {
 
   return (
     <ThemedView style={styles.container}>
+      <RotateCamBtn setCameraPosition={setCameraPosition} />
       <Camera
         style={StyleSheet.absoluteFill}
         device={device}
