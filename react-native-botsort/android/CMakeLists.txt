@@ -36,7 +36,6 @@ set(YAML_CPP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(YAML_CPP_BUILD_TOOLS OFF CACHE BOOL "" FORCE)
 set(YAML_CPP_BUILD_CONTRIB OFF CACHE BOOL "" FORCE)
 set(YAML_BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
-set(YAML_CPP_INSTALL ON CACHE BOOL "" FORCE)   # required — export() below needs this
 
 FetchContent_Declare(
   yaml-cpp
@@ -45,33 +44,15 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(yaml-cpp)
 
-# Build-tree package config matching the 0.8.0-era upstream template's expected
-# variable names (this predates the Oct 2023 upstream fix that switched to
-# CMAKE_CURRENT_LIST_DIR-based target lookup and dropped the namespaced
-# EXPORT_TARGETS from check_required_components — 0.8.0 still uses the older
-# PATH_VAR-based CONFIG_EXPORT_DIR mechanism and expects a plain, non-namespaced
-# EXPORT_TARGETS value).
-set(YAML_BUILD_SHARED_LIBS OFF)
-set(CONFIG_EXPORT_DIR "${yaml-cpp_BINARY_DIR}")
-set(EXPORT_TARGETS "yaml-cpp")
-set(CMAKE_INSTALL_INCLUDEDIR "${yaml-cpp_SOURCE_DIR}/include")
-set(CMAKE_INSTALL_LIBDIR "${yaml-cpp_BINARY_DIR}")
-
-configure_package_config_file(
-  "${yaml-cpp_SOURCE_DIR}/yaml-cpp-config.cmake.in"
-  "${yaml-cpp_BINARY_DIR}/yaml-cpp-config.cmake"
-  INSTALL_DESTINATION "${yaml-cpp_BINARY_DIR}"
-  PATH_VARS
-    CMAKE_INSTALL_INCLUDEDIR
-    CMAKE_INSTALL_LIBDIR
-    CONFIG_EXPORT_DIR
-    YAML_BUILD_SHARED_LIBS
-)
-
-export(TARGETS yaml-cpp
-  FILE "${yaml-cpp_BINARY_DIR}/yaml-cpp-targets.cmake"
-  NAMESPACE yaml-cpp::
-)
+# motcpp calls find_package(yaml-cpp) during the same configure pass. Its
+# FetchContent target already exists, so provide an immediate build-tree config
+# instead of relying on yaml-cpp's deferred install/export generation.
+file(WRITE "${yaml-cpp_BINARY_DIR}/yaml-cpp-config.cmake" "
+if(NOT TARGET yaml-cpp::yaml-cpp)
+  message(FATAL_ERROR \"yaml-cpp::yaml-cpp target not found in build tree\")
+endif()
+set(yaml-cpp_FOUND TRUE)
+")
 
 set(yaml-cpp_DIR "${yaml-cpp_BINARY_DIR}" CACHE PATH "" FORCE)
 list(PREPEND CMAKE_PREFIX_PATH "${yaml-cpp_DIR}")
