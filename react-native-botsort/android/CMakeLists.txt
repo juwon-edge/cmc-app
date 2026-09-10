@@ -68,7 +68,7 @@ configure_package_config_file(
     YAML_BUILD_SHARED_LIBS
 )
 
-export(EXPORT yaml-cpp-targets
+export(TARGETS yaml-cpp
   FILE "${yaml-cpp_BINARY_DIR}/yaml-cpp-targets.cmake"
   NAMESPACE yaml-cpp::
 )
