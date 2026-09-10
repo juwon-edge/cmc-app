@@ -96,12 +96,15 @@ include_directories(
 )
 
 find_library(LOG_LIB log)
+find_package(react-native-vision-camera REQUIRED)   # <-- for the HybridBoTSortTrackerSpec
 
 # Link all libraries together — single consolidated call
-target_link_libraries(${PACKAGE_NAME}
+target_link_libraries(
+        ${PACKAGE_NAME}
         ${LOG_LIB}
         android                                   # <-- Android core
         motcpp::motcpp
+        react-native-vision-camera::VisionCamera 
         ${OpenCV_LIBS}
 )
 
