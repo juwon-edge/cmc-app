@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 3.22)
-project(NitroBoTSort)
+project(NitroBotsort)
+set(PACKAGE_NAME NitroBotsort)
 
 # Enforce strict C++17 optimization rules
 set(CMAKE_CXX_STANDARD 17)
@@ -34,24 +35,23 @@ set(CMAKE_FIND_PACKAGE_PREFER_CONFIG ON)
 set(YAML_CPP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(YAML_CPP_BUILD_TOOLS OFF CACHE BOOL "" FORCE)
 set(YAML_CPP_BUILD_CONTRIB OFF CACHE BOOL "" FORCE)
+set(YAML_CPP_INSTALL ON CACHE BOOL "" FORCE)
 FetchContent_Declare(
   yaml-cpp
   GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
   GIT_TAG        0.8.0
 )
-FetchContent_GetProperties(yaml-cpp)
-if(NOT yaml-cpp_POPULATED)
-    FetchContent_Populate(yaml-cpp)
-    # yaml-cpp writes a config file that expects install-style paths. For a
-    # FetchContent build tree, point those paths at the real source/build dirs so
-    # motcpp's `find_package(yaml-cpp REQUIRED)` resolves correctly.
-    set(CMAKE_INSTALL_PREFIX "${yaml-cpp_BINARY_DIR}" CACHE PATH "" FORCE)
-    set(CMAKE_INSTALL_INCLUDEDIR "${yaml-cpp_SOURCE_DIR}/include" CACHE PATH "" FORCE)
-    set(CMAKE_INSTALL_LIBDIR "${yaml-cpp_BINARY_DIR}" CACHE PATH "" FORCE)
-    set(YAML_CPP_INSTALL_CMAKEDIR "${yaml-cpp_BINARY_DIR}" CACHE STRING "" FORCE)
-    add_subdirectory(${yaml-cpp_SOURCE_DIR} ${yaml-cpp_BINARY_DIR})
-endif()
-set(yaml-cpp_DIR "${yaml-cpp_BINARY_DIR}")
+FetchContent_MakeAvailable(yaml-cpp)
+
+# yaml-cpp's generated package config expects a targets file alongside it.
+# In a FetchContent build tree we need to export the targets into the same
+# directory that the generated yaml-cpp-config.cmake includes.
+set(yaml-cpp_DIR "${yaml-cpp_BINARY_DIR}" CACHE PATH "" FORCE)
+set(YAML_CPP_INSTALL_CMAKEDIR "${yaml-cpp_BINARY_DIR}/cmake/yaml-cpp" CACHE PATH "" FORCE)
+set(CMAKE_INSTALL_INCLUDEDIR "${yaml-cpp_SOURCE_DIR}/include" CACHE PATH "" FORCE)
+set(CMAKE_INSTALL_LIBDIR "${yaml-cpp_BINARY_DIR}" CACHE PATH "" FORCE)
+file(MAKE_DIRECTORY "${yaml-cpp_BINARY_DIR}/cmake/yaml-cpp")
+export(EXPORT yaml-cpp-targets FILE "${yaml-cpp_BINARY_DIR}/cmake/yaml-cpp/yaml-cpp-targets.cmake" NAMESPACE yaml-cpp::)
 list(PREPEND CMAKE_PREFIX_PATH "${yaml-cpp_DIR}")
 set(CMAKE_FIND_PACKAGE_PREFER_CONFIG ON)
 
@@ -83,9 +83,8 @@ add_library(${PACKAGE_NAME} SHARED
 )
 
 # Add Nitrogen specs :)
-# Double check this filename matches exactly what's in nitrogen/generated/android/
-# (case-sensitive on most Linux/CI filesystems) — likely NitroBoTSort+autolinking.cmake
-include(${CMAKE_SOURCE_DIR}/../nitrogen/generated/android/NitroBoTSort+autolinking.cmake)
+# This filename must match the generated file exactly, including case.
+include(${CMAKE_SOURCE_DIR}/../nitrogen/generated/android/NitroBotsort+autolinking.cmake)
 
 # Set up local includes
 include_directories(
