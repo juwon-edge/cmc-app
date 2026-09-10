@@ -54,16 +54,16 @@ FetchContent_MakeAvailable(yaml-cpp)
 set(YAML_BUILD_SHARED_LIBS OFF)
 set(CONFIG_EXPORT_DIR "${yaml-cpp_BINARY_DIR}")
 set(EXPORT_TARGETS "yaml-cpp")
-set(YAML_CPP_INCLUDE_DIR "${yaml-cpp_SOURCE_DIR}/include")
-set(YAML_CPP_LIBRARY_DIR "${yaml-cpp_BINARY_DIR}")
+set(CMAKE_INSTALL_INCLUDEDIR "${yaml-cpp_SOURCE_DIR}/include")
+set(CMAKE_INSTALL_LIBDIR "${yaml-cpp_BINARY_DIR}")
 
 configure_package_config_file(
   "${yaml-cpp_SOURCE_DIR}/yaml-cpp-config.cmake.in"
   "${yaml-cpp_BINARY_DIR}/yaml-cpp-config.cmake"
   INSTALL_DESTINATION "${yaml-cpp_BINARY_DIR}"
   PATH_VARS
-    YAML_CPP_INCLUDE_DIR
-    YAML_CPP_LIBRARY_DIR
+    CMAKE_INSTALL_INCLUDEDIR
+    CMAKE_INSTALL_LIBDIR
     CONFIG_EXPORT_DIR
     YAML_BUILD_SHARED_LIBS
 )
