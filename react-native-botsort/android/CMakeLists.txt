@@ -35,7 +35,8 @@ set(CMAKE_FIND_PACKAGE_PREFER_CONFIG ON)
 set(YAML_CPP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(YAML_CPP_BUILD_TOOLS OFF CACHE BOOL "" FORCE)
 set(YAML_CPP_BUILD_CONTRIB OFF CACHE BOOL "" FORCE)
-set(YAML_CPP_INSTALL ON CACHE BOOL "" FORCE)
+set(YAML_BUILD_SHARED_LIBS OFF CACHE BOOL "" FORCE)
+set(YAML_CPP_INSTALL ON CACHE BOOL "" FORCE)   # required — export() below needs this
 
 FetchContent_Declare(
   yaml-cpp
@@ -44,28 +45,33 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(yaml-cpp)
 
-# Generate yaml-cpp's package config from its own template, using the exact
-# @PACKAGE_...@ token names the template actually contains (verified directly
-# against yaml-cpp-config.cmake.in): CMAKE_INSTALL_INCLUDEDIR and
-# CMAKE_INSTALL_LIBDIR are the two PATH_VARS entries it substitutes.
-# YAML_BUILD_SHARED_LIBS and EXPORT_TARGETS are plain (non-PACKAGE_-prefixed)
-# @VAR@ substitutions, so they're set directly rather than passed via PATH_VARS.
-include(CMakePackageConfigHelpers)
-set(CMAKE_INSTALL_INCLUDEDIR "${yaml-cpp_SOURCE_DIR}/include")
-set(CMAKE_INSTALL_LIBDIR "${yaml-cpp_BINARY_DIR}")
+# Build-tree package config matching the 0.8.0-era upstream template's expected
+# variable names (this predates the Oct 2023 upstream fix that switched to
+# CMAKE_CURRENT_LIST_DIR-based target lookup and dropped the namespaced
+# EXPORT_TARGETS from check_required_components — 0.8.0 still uses the older
+# PATH_VAR-based CONFIG_EXPORT_DIR mechanism and expects a plain, non-namespaced
+# EXPORT_TARGETS value).
 set(YAML_BUILD_SHARED_LIBS OFF)
-set(EXPORT_TARGETS "yaml-cpp::yaml-cpp")
+set(CONFIG_EXPORT_DIR "${yaml-cpp_BINARY_DIR}")
+set(EXPORT_TARGETS "yaml-cpp")
+set(YAML_CPP_INCLUDE_DIR "${yaml-cpp_SOURCE_DIR}/include")
+set(YAML_CPP_LIBRARY_DIR "${yaml-cpp_BINARY_DIR}")
 
 configure_package_config_file(
   "${yaml-cpp_SOURCE_DIR}/yaml-cpp-config.cmake.in"
   "${yaml-cpp_BINARY_DIR}/yaml-cpp-config.cmake"
   INSTALL_DESTINATION "${yaml-cpp_BINARY_DIR}"
-  PATH_VARS CMAKE_INSTALL_INCLUDEDIR CMAKE_INSTALL_LIBDIR
+  PATH_VARS
+    YAML_CPP_INCLUDE_DIR
+    YAML_CPP_LIBRARY_DIR
+    CONFIG_EXPORT_DIR
+    YAML_BUILD_SHARED_LIBS
 )
 
-# yaml-cpp-config.cmake's own include() line uses CMAKE_CURRENT_LIST_DIR, so the
-# targets file must sit directly alongside it (yaml-cpp_BINARY_DIR, flat).
-export(EXPORT yaml-cpp-targets FILE "${yaml-cpp_BINARY_DIR}/yaml-cpp-targets.cmake" NAMESPACE yaml-cpp::)
+export(EXPORT yaml-cpp-targets
+  FILE "${yaml-cpp_BINARY_DIR}/yaml-cpp-targets.cmake"
+  NAMESPACE yaml-cpp::
+)
 
 set(yaml-cpp_DIR "${yaml-cpp_BINARY_DIR}" CACHE PATH "" FORCE)
 list(PREPEND CMAKE_PREFIX_PATH "${yaml-cpp_DIR}")
