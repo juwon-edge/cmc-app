@@ -32,6 +32,7 @@ endif()
 list(PREPEND CMAKE_PREFIX_PATH "${Eigen3_DIR}" "${eigen3_DIR}")
 set(CMAKE_FIND_PACKAGE_PREFER_CONFIG ON)
 
+set(YAML_CPP_INSTALL ON CACHE BOOL "" FORCE)
 set(YAML_CPP_BUILD_TESTS OFF CACHE BOOL "" FORCE)
 set(YAML_CPP_BUILD_TOOLS OFF CACHE BOOL "" FORCE)
 set(YAML_CPP_BUILD_CONTRIB OFF CACHE BOOL "" FORCE)
@@ -82,7 +83,6 @@ FetchContent_MakeAvailable(motcpp)
 add_library(${PACKAGE_NAME} SHARED
         src/main/cpp/cpp-adapter.cpp
         ../cpp/HybridBoTSortTracker.cpp
-        ../nitrogen/generated/android/NitroBotsortOnLoad.cpp
 )
 
 # Add Nitrogen specs :)
@@ -101,7 +101,6 @@ find_library(LOG_LIB log)
 target_link_libraries(${PACKAGE_NAME}
         ${LOG_LIB}
         android                                   # <-- Android core
-        react-native-nitro-modules::nitro
         motcpp::motcpp
         ${OpenCV_LIBS}
 )
