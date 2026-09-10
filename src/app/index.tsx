@@ -8,7 +8,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { useEffect, useState } from "react";
 import { Pressable, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { Camera, usePhotoOutput } from "react-native-vision-camera";
+import { Camera } from "react-native-vision-camera";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -17,7 +17,6 @@ export default function Index() {
   const detectionModel = useDetectionnModel();
   const [device, setCameraPosition] = useCameraDevice("back");
   const [mounted, setMounted] = useState(false);
-  const l = usePhotoOutput();
 
   useEffect(() => {
     const t = setTimeout(() => setMounted(true), 30);

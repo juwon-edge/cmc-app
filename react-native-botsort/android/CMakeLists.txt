@@ -41,16 +41,24 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(yaml-cpp)
 
-# motcpp calls `find_package(yaml-cpp REQUIRED)` during its own configure step.
-# When yaml-cpp is built via FetchContent, its generated config files live in the
-# build tree rather than a system prefix, so we expose that path to CMake.
+# yaml-cpp's generated package config assumes an install prefix and points
+# YAML_CPP_INCLUDE_DIR to `${prefix}/include`, which does not exist for a
+# FetchContent build tree. Override that with a build-tree-compatible package
+# config so motcpp's `find_package(yaml-cpp REQUIRED)` succeeds.
 if(DEFINED yaml-cpp_BINARY_DIR)
     set(yaml-cpp_DIR "${yaml-cpp_BINARY_DIR}")
+    set(YAML_CPP_INCLUDE_DIR "${yaml-cpp_SOURCE_DIR}/include")
+    set(YAML_CPP_LIBRARY_DIR "${yaml-cpp_BINARY_DIR}")
+    set(YAML_CPP_SHARED_LIBS_BUILT OFF)
+    set(YAML_CPP_LIBRARIES "yaml-cpp::yaml-cpp")
+    if(NOT TARGET yaml-cpp::yaml-cpp)
+        add_library(yaml-cpp::yaml-cpp ALIAS yaml-cpp)
+    endif()
+    file(WRITE "${yaml-cpp_BINARY_DIR}/yaml-cpp-config.cmake" "[=[\nset(YAML_CPP_INCLUDE_DIR \"${yaml-cpp_SOURCE_DIR}/include\")\nset(YAML_CPP_LIBRARY_DIR \"${yaml-cpp_BINARY_DIR}\")\nset(YAML_CPP_SHARED_LIBS_BUILT OFF)\nset(YAML_CPP_LIBRARIES \"yaml-cpp::yaml-cpp\")\nif(NOT TARGET yaml-cpp::yaml-cpp)\n  add_library(yaml-cpp::yaml-cpp ALIAS yaml-cpp)\nendif()\nset(yaml-cpp_FOUND TRUE)\n]=]")
+    list(PREPEND CMAKE_PREFIX_PATH "${yaml-cpp_DIR}")
 endif()
 if(DEFINED YAML_CPP_BINARY_DIR)
     set(yaml-cpp_DIR "${YAML_CPP_BINARY_DIR}")
-endif()
-if(DEFINED yaml-cpp_DIR)
     list(PREPEND CMAKE_PREFIX_PATH "${yaml-cpp_DIR}")
 endif()
 set(CMAKE_FIND_PACKAGE_PREFER_CONFIG ON)
