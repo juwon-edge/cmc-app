@@ -39,28 +39,20 @@ FetchContent_Declare(
   GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
   GIT_TAG        0.8.0
 )
-FetchContent_MakeAvailable(yaml-cpp)
-
-# yaml-cpp's generated package config assumes an install prefix and points
-# YAML_CPP_INCLUDE_DIR to `${prefix}/include`, which does not exist for a
-# FetchContent build tree. Override that with a build-tree-compatible package
-# config so motcpp's `find_package(yaml-cpp REQUIRED)` succeeds.
-if(DEFINED yaml-cpp_BINARY_DIR)
-    set(yaml-cpp_DIR "${yaml-cpp_BINARY_DIR}")
-    set(YAML_CPP_INCLUDE_DIR "${yaml-cpp_SOURCE_DIR}/include")
-    set(YAML_CPP_LIBRARY_DIR "${yaml-cpp_BINARY_DIR}")
-    set(YAML_CPP_SHARED_LIBS_BUILT OFF)
-    set(YAML_CPP_LIBRARIES "yaml-cpp::yaml-cpp")
-    if(NOT TARGET yaml-cpp::yaml-cpp)
-        add_library(yaml-cpp::yaml-cpp ALIAS yaml-cpp)
-    endif()
-    file(WRITE "${yaml-cpp_BINARY_DIR}/yaml-cpp-config.cmake" "[=[\nset(YAML_CPP_INCLUDE_DIR \"${yaml-cpp_SOURCE_DIR}/include\")\nset(YAML_CPP_LIBRARY_DIR \"${yaml-cpp_BINARY_DIR}\")\nset(YAML_CPP_SHARED_LIBS_BUILT OFF)\nset(YAML_CPP_LIBRARIES \"yaml-cpp::yaml-cpp\")\nif(NOT TARGET yaml-cpp::yaml-cpp)\n  add_library(yaml-cpp::yaml-cpp ALIAS yaml-cpp)\nendif()\nset(yaml-cpp_FOUND TRUE)\n]=]")
-    list(PREPEND CMAKE_PREFIX_PATH "${yaml-cpp_DIR}")
+FetchContent_GetProperties(yaml-cpp)
+if(NOT yaml-cpp_POPULATED)
+    FetchContent_Populate(yaml-cpp)
+    # yaml-cpp writes a config file that expects install-style paths. For a
+    # FetchContent build tree, point those paths at the real source/build dirs so
+    # motcpp's `find_package(yaml-cpp REQUIRED)` resolves correctly.
+    set(CMAKE_INSTALL_PREFIX "${yaml-cpp_BINARY_DIR}" CACHE PATH "" FORCE)
+    set(CMAKE_INSTALL_INCLUDEDIR "${yaml-cpp_SOURCE_DIR}/include" CACHE PATH "" FORCE)
+    set(CMAKE_INSTALL_LIBDIR "${yaml-cpp_BINARY_DIR}" CACHE PATH "" FORCE)
+    set(YAML_CPP_INSTALL_CMAKEDIR "${yaml-cpp_BINARY_DIR}" CACHE STRING "" FORCE)
+    add_subdirectory(${yaml-cpp_SOURCE_DIR} ${yaml-cpp_BINARY_DIR})
 endif()
-if(DEFINED YAML_CPP_BINARY_DIR)
-    set(yaml-cpp_DIR "${YAML_CPP_BINARY_DIR}")
-    list(PREPEND CMAKE_PREFIX_PATH "${yaml-cpp_DIR}")
-endif()
+set(yaml-cpp_DIR "${yaml-cpp_BINARY_DIR}")
+list(PREPEND CMAKE_PREFIX_PATH "${yaml-cpp_DIR}")
 set(CMAKE_FIND_PACKAGE_PREFER_CONFIG ON)
 
 FetchContent_Declare(
