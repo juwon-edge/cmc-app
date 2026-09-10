@@ -1,11 +1,11 @@
 {
   "expo": {
     "name": "MotoSpot",
-    "slug": "cmc-app",
+    "slug": "moto-spot",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon_opaque.png",
-    "scheme": "cmcapp",
+    "scheme": "moto-spot",
     "userInterfaceStyle": "automatic",
     "ios": {
       "icon": "./assets/images/icon_opaque.png",
@@ -13,16 +13,18 @@
         "NSCameraUsageDescription": "$(PRODUCT_NAME) needs access to your camera ",
         "ITSAppUsesNonExemptEncryption": false
       },
-      "bundleIdentifier": "com.juwon33.cmcapp"
+      "bundleIdentifier": "com.juwon33.moto-spot"
     },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#000000",
         "foregroundImage": "./assets/images/icon_transparent.png"
       },
-      "permissions": ["android.permission.CAMERA"],
+      "permissions": [
+        "android.permission.CAMERA"
+      ],
       "predictiveBackGestureEnabled": true,
-      "package": "com.juwon33.cmcapp"
+      "package": "com.juwon33.motospot"
     },
     "plugins": [
       "expo-router",
@@ -51,8 +53,9 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "727a91cc-c75c-44e7-9295-7805a1bb16ce"
+        "projectId": "ed256454-4a5a-4c6c-bfc2-ad21c052e9c4"
       }
-    }
+    },
+    "owner": "juwon34"
   }
 }
