@@ -37,13 +37,6 @@ set(YAML_CPP_BUILD_TOOLS OFF CACHE BOOL "" FORCE)
 set(YAML_CPP_BUILD_CONTRIB OFF CACHE BOOL "" FORCE)
 set(YAML_CPP_INSTALL ON CACHE BOOL "" FORCE)
 
-# Must be set BEFORE FetchContent_MakeAvailable — configure_package_config_file()
-# runs inside yaml-cpp's own CMakeLists.txt during that call, and bakes these
-# values into yaml-cpp-config.cmake's relative-path math at that moment.
-set(YAML_CPP_INSTALL_CMAKEDIR "${CMAKE_CURRENT_BINARY_DIR}/_deps/yaml-cpp-build/cmake/yaml-cpp" CACHE PATH "" FORCE)
-set(CMAKE_INSTALL_INCLUDEDIR "${CMAKE_CURRENT_BINARY_DIR}/_deps/yaml-cpp-src/include" CACHE PATH "" FORCE)
-set(CMAKE_INSTALL_LIBDIR "${CMAKE_CURRENT_BINARY_DIR}/_deps/yaml-cpp-build" CACHE PATH "" FORCE)
-
 FetchContent_Declare(
   yaml-cpp
   GIT_REPOSITORY https://github.com/jbeder/yaml-cpp.git
@@ -51,11 +44,23 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(yaml-cpp)
 
-# Now yaml-cpp_BINARY_DIR/_SOURCE_DIR are defined, and the export set exists.
-# Write the targets file to the exact path the config file expects.
+# Clean fix: generate the package config from yaml-cpp's own template and point
+# CMake at the actual build-tree package directory. This matches the config file's
+# runtime expectations without copy/move hacks.
+include(CMakePackageConfigHelpers)
+set(YAML_CPP_INCLUDE_DIR "${yaml-cpp_SOURCE_DIR}/include")
+set(YAML_CPP_LIBRARY_DIR "${yaml-cpp_BINARY_DIR}")
+set(YAML_CPP_SHARED_LIBS_BUILT OFF)
+set(CONFIG_EXPORT_DIR "${yaml-cpp_BINARY_DIR}")
+set(EXPORT_TARGETS "yaml-cpp")
+configure_package_config_file(
+  "${yaml-cpp_SOURCE_DIR}/yaml-cpp-config.cmake.in"
+  "${yaml-cpp_BINARY_DIR}/yaml-cpp-config.cmake"
+  INSTALL_DESTINATION "${yaml-cpp_BINARY_DIR}"
+  PATH_VARS YAML_CPP_INCLUDE_DIR YAML_CPP_LIBRARY_DIR CONFIG_EXPORT_DIR YAML_BUILD_SHARED_LIBS
+)
+export(EXPORT yaml-cpp-targets FILE "${yaml-cpp_BINARY_DIR}/yaml-cpp-targets.cmake" NAMESPACE yaml-cpp::)
 set(yaml-cpp_DIR "${yaml-cpp_BINARY_DIR}" CACHE PATH "" FORCE)
-file(MAKE_DIRECTORY "${yaml-cpp_BINARY_DIR}/cmake/yaml-cpp")
-export(EXPORT yaml-cpp-targets FILE "${yaml-cpp_BINARY_DIR}/cmake/yaml-cpp/yaml-cpp-targets.cmake" NAMESPACE yaml-cpp::)
 list(PREPEND CMAKE_PREFIX_PATH "${yaml-cpp_DIR}")
 set(CMAKE_FIND_PACKAGE_PREFER_CONFIG ON)
 
@@ -83,7 +88,7 @@ FetchContent_MakeAvailable(motcpp)
 add_library(${PACKAGE_NAME} SHARED
         src/main/cpp/cpp-adapter.cpp
         ../cpp/HybridBoTSortTracker.cpp
-        ../nitrogen/generated/android/NitroBoTSortOnLoad.cpp
+        ../nitrogen/generated/android/NitroBotsortOnLoad.cpp
 )
 
 # Add Nitrogen specs :)
