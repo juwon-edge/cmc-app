@@ -164,5 +164,8 @@ dependencies {
 
   // Add a dependency on NitroModules
   implementation project(":react-native-nitro-modules")
+
+  // Add a dependency on VisionCamera for HybridFrameSpec
+  implementation project(":react-native-vision-camera")
 }
 
