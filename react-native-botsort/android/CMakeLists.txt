@@ -41,6 +41,20 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(yaml-cpp)
 
+# motcpp calls `find_package(yaml-cpp REQUIRED)` during its own configure step.
+# When yaml-cpp is built via FetchContent, its generated config files live in the
+# build tree rather than a system prefix, so we expose that path to CMake.
+if(DEFINED yaml-cpp_BINARY_DIR)
+    set(yaml-cpp_DIR "${yaml-cpp_BINARY_DIR}")
+endif()
+if(DEFINED YAML_CPP_BINARY_DIR)
+    set(yaml-cpp_DIR "${YAML_CPP_BINARY_DIR}")
+endif()
+if(DEFINED yaml-cpp_DIR)
+    list(PREPEND CMAKE_PREFIX_PATH "${yaml-cpp_DIR}")
+endif()
+set(CMAKE_FIND_PACKAGE_PREFER_CONFIG ON)
+
 FetchContent_Declare(
   opencv_mobile_android
   URL https://github.com/nihui/opencv-mobile/releases/download/v35/opencv-mobile-4.13.0-android.zip
