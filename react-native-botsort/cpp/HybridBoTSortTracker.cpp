@@ -57,7 +57,8 @@ namespace margelo::nitro::botsort
 
 // 1. Hardware Direct Video Frame Extraction & Channel Mapping
 #if __ANDROID__
-        AHardwareBuffer *buffer = frame->getHardwareBuffer();
+        auto nativeBuffer = frame->getNativeBuffer();
+        AHardwareBuffer *buffer = reinterpret_cast<AHardwareBuffer *>(nativeBuffer.pointer);
         if (!buffer)
             return {};
 
@@ -69,6 +70,7 @@ namespace margelo::nitro::botsort
         void *baseAddress = nullptr;
         if (AHardwareBuffer_lock(buffer, AHARDWAREBUFFER_USAGE_CPU_READ_OFTEN, -1, nullptr, &baseAddress) != 0 || !baseAddress)
         {
+            nativeBuffer.release();
             return {};
         }
 
@@ -85,6 +87,7 @@ namespace margelo::nitro::botsort
         else
         {
             AHardwareBuffer_unlock(buffer, nullptr);
+            nativeBuffer.release();
             return {};
         }
 
@@ -121,6 +124,7 @@ namespace margelo::nitro::botsort
         {
 #if __ANDROID__
             AHardwareBuffer_unlock(buffer, nullptr);
+            nativeBuffer.release();
 #elif __APPLE__
             CVPixelBufferUnlockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
 #endif
@@ -158,6 +162,7 @@ namespace margelo::nitro::botsort
 // 5. Clean up Native Memory Locks Immediately
 #if __ANDROID__
         AHardwareBuffer_unlock(buffer, nullptr);
+        nativeBuffer.release();
 #elif __APPLE__
         CVPixelBufferUnlockBaseAddress(pixelBuffer, kCVPixelBufferLock_ReadOnly);
 #endif
@@ -171,14 +176,13 @@ namespace margelo::nitro::botsort
             float trackedX2 = tracks(i, 2) * scaleFactorX;
             float trackedY3 = tracks(i, 3) * scaleFactorY;
 
-            nativeResults.push_back({
-                static_cast<double>(tracks(i, 4)),          // id
-                static_cast<double>(trackedX1),             // x
-                static_cast<double>(trackedY1),             // y
-                static_cast<double>(trackedX2 - trackedX1), // width (w)
-                static_cast<double>(trackedY3 - trackedY1), // height (h)
-                static_cast<double>(tracks(i, 6))           // classId
-            });
+            nativeResults.emplace_back(
+                static_cast<double>(tracks(i, 4)),
+                static_cast<double>(trackedX1),
+                static_cast<double>(trackedY1),
+                static_cast<double>(trackedX2 - trackedX1),
+                static_cast<double>(trackedY3 - trackedY1),
+                static_cast<double>(tracks(i, 6)));
         }
 
         return nativeResults;

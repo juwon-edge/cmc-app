@@ -18,7 +18,7 @@ namespace margelo::nitro::botsort
         void initialize(const std::string &reidModelPath, bool useGpu) override;
 
         std::vector<TrackedObject> updateWithFrame(
-            const std::shared_ptr<margelo::nitro::Frame> &frame,
+            const std::shared_ptr<margelo::nitro::camera::HybridFrameSpec> &frame,
             const std::vector<BoundingBox> &detections) override;
 
     private:
