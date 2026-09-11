@@ -94,7 +94,17 @@ jobs:
             -DWITH_WEBP=OFF \
             -DWITH_OPENJPEG=OFF \
             -DWITH_PNG=OFF \
-            -DWITH_ZLIB=ON
+            -DWITH_ZLIB=ON \
+            -DWITH_CUDA=OFF \
+            -DWITH_OPENCL=OFF \
+            -DWITH_VULKAN=OFF \
+            -DWITH_OPENGL=OFF \
+            -DWITH_GSTREAMER=OFF \
+            -DWITH_VTK=OFF \
+            -DWITH_GDAL=OFF \
+            -DWITH_IMGCODEC_HDR=OFF \
+            -DWITH_IMGCODEC_PXM=OFF \
+            -DWITH_IMGCODEC_SUNRASTER=OFF
 
       - name: Build (${{ matrix.abi }})
         working-directory: opencv
