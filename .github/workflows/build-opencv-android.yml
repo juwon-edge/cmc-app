@@ -55,7 +55,7 @@ jobs:
             -DANDROID_ABI=${{ matrix.abi }} \
             -DANDROID_NATIVE_API_LEVEL=24 \
             -DANDROID_STL=c++_shared \
-            -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/build_${{ matrix.abi }}/install \
+            -DCMAKE_INSTALL_PREFIX=./build_${{ matrix.abi }}/install \
             -DBUILD_ANDROID_PROJECTS=OFF \
             -DBUILD_ANDROID_EXAMPLES=OFF \
             -DBUILD_JAVA=OFF \
