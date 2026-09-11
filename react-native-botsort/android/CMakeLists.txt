@@ -75,6 +75,34 @@ FetchContent_Declare(
   GIT_REPOSITORY https://github.com/Geekgineer/motcpp.git
   GIT_TAG        main
 )
+
+# ONNX Runtime Android setup for later testing:
+# set(ONNXRUNTIME_VERSION "1.20.1")
+# set(ONNXRUNTIME_AAR "${CMAKE_BINARY_DIR}/third_party/onnxruntime-android-${ONNXRUNTIME_VERSION}.aar")
+# set(ONNXRUNTIME_ANDROID_DIR "${CMAKE_BINARY_DIR}/third_party/onnxruntime-android-${ONNXRUNTIME_VERSION}")
+# set(ONNXRUNTIME_ANDROID_LIB "${ONNXRUNTIME_ANDROID_DIR}/jni/${CMAKE_ANDROID_ARCH_ABI}/libonnxruntime.so")
+# file(MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/third_party")
+# file(DOWNLOAD
+#   "https://repo1.maven.org/maven2/com/microsoft/onnxruntime/onnxruntime-android/${ONNXRUNTIME_VERSION}/onnxruntime-android-${ONNXRUNTIME_VERSION}.aar"
+#   "${ONNXRUNTIME_AAR}"
+#   SHOW_PROGRESS
+#   TLS_VERIFY ON
+# )
+# file(MAKE_DIRECTORY "${ONNXRUNTIME_ANDROID_DIR}")
+# execute_process(
+#   COMMAND "${CMAKE_COMMAND}" -E tar xf "${ONNXRUNTIME_AAR}"
+#   WORKING_DIRECTORY "${ONNXRUNTIME_ANDROID_DIR}"
+# )
+# add_library(onnxruntime_android SHARED IMPORTED GLOBAL)
+# set_target_properties(onnxruntime_android PROPERTIES
+#   IMPORTED_LOCATION "${ONNXRUNTIME_ANDROID_LIB}"
+#   INTERFACE_INCLUDE_DIRECTORIES "${ONNXRUNTIME_ANDROID_DIR}/headers"
+# )
+# target_compile_definitions(motcpp PUBLIC MOTCPP_HAS_ONNX=1)
+# target_link_libraries(motcpp PRIVATE onnxruntime_android)
+
+# Keep ONNX Runtime disabled until the Android package is tested.
+set(MOTCPP_ENABLE_ONNX OFF CACHE BOOL "Disable ONNX Runtime" FORCE)
 FetchContent_MakeAvailable(motcpp)
 
 # Define the single shared library target for this native module.
@@ -104,7 +132,7 @@ target_link_libraries(
         ${LOG_LIB}
         android                                   # <-- Android core
         motcpp::motcpp
-  react-native-vision-camera::VisionCamera
+        react-native-vision-camera::VisionCamera
         ${OpenCV_LIBS}
 )
 
