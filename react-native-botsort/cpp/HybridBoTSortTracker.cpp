@@ -38,7 +38,7 @@ namespace margelo::nitro::botsort
             0.8f,
             0.5f,
             0.25f,
-            "sparseOptFlow",
+            "sof",
             30,
             false,
             false);
