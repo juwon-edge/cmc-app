@@ -4,13 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       opencv_version:
-        description: 'OpenCV tag/branch to build'
+        description: "OpenCV tag/branch to build"
         required: false
-        default: '4.10.0'
+        default: "4.12.0"
       ndk_version:
-        description: 'NDK version'
+        description: "NDK version"
         required: false
-        default: '27.0.12077973'
+        default: "27.0.12077973"
 
 jobs:
   build:
@@ -32,7 +32,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '17'
+          java-version: "17"
 
       - name: Install NDK
         run: |
@@ -55,7 +55,7 @@ jobs:
             -DANDROID_ABI=${{ matrix.abi }} \
             -DANDROID_NATIVE_API_LEVEL=24 \
             -DANDROID_STL=c++_shared \
-            -DCMAKE_INSTALL_PREFIX=install \
+            -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install \
             -DBUILD_ANDROID_PROJECTS=OFF \
             -DBUILD_ANDROID_EXAMPLES=OFF \
             -DBUILD_JAVA=OFF \
@@ -96,7 +96,10 @@ jobs:
 
       - name: Install (${{ matrix.abi }})
         working-directory: opencv
-        run: ninja -C build_${{ matrix.abi }} install
+        run: |
+          ninja -C build_${{ matrix.abi }} install
+          echo "Installed files:"
+          find build_${{ matrix.abi }}/install -type f
 
       - name: Stage output
         run: |
