@@ -2,8 +2,8 @@ cmake_minimum_required(VERSION 3.22)
 project(NitroBotsort)
 set(PACKAGE_NAME NitroBotsort)
 
-# Enforce strict C++17 optimization rules
-set(CMAKE_CXX_STANDARD 17)
+# Nitro 0.37 requires C++20 (remove_cvref_t, map::contains, and abbreviated templates).
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 include(FetchContent)
@@ -103,6 +103,9 @@ FetchContent_Declare(
 
 # Keep ONNX Runtime disabled until the Android package is tested.
 set(MOTCPP_ENABLE_ONNX OFF CACHE BOOL "Disable ONNX Runtime" FORCE)
+set(ONNXRUNTIME_FOUND FALSE CACHE BOOL "Disable ONNX Runtime discovery" FORCE)
+unset(ONNXRUNTIME_INCLUDE_DIR CACHE)
+unset(ONNXRUNTIME_LIBRARY CACHE)
 FetchContent_MakeAvailable(motcpp)
 
 # Define the single shared library target for this native module.
