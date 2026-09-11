@@ -16,11 +16,28 @@ FetchContent_Declare(
 set(EIGEN_BUILD_DOC OFF CACHE BOOL "" FORCE)
 set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
 set(EIGEN_BUILD_TESTING OFF CACHE BOOL "" FORCE)
-set(EIGEN_BUILD_BENCHMARKS OFF CACHE BOOL "" FORCE)
-set(EIGEN_BUILD_BLAS OFF CACHE BOOL "" FORCE)
-set(EIGEN_BUILD_LAPACK OFF CACHE BOOL "" FORCE)
+set(EIGEN_BUILD_BTL OFF CACHE BOOL "" FORCE)
 set(EIGEN_BUILD_PKGCONFIG OFF CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(Eigen3)
+FetchContent_Populate(Eigen3)
+
+# Eigen 3.4 always declares BLAS/LAPACK and spbench targets. Android's
+# externalNativeBuild tries to compile every declared target, so remove those
+# optional subdirectories before configuring Eigen itself.
+file(READ "${eigen3_SOURCE_DIR}/CMakeLists.txt" EIGEN_CMAKE)
+string(REPLACE
+  "add_subdirectory(blas EXCLUDE_FROM_ALL)"
+  "# add_subdirectory(blas EXCLUDE_FROM_ALL)"
+  EIGEN_CMAKE "${EIGEN_CMAKE}")
+string(REPLACE
+  "add_subdirectory(lapack EXCLUDE_FROM_ALL)"
+  "# add_subdirectory(lapack EXCLUDE_FROM_ALL)"
+  EIGEN_CMAKE "${EIGEN_CMAKE}")
+string(REPLACE
+  "add_subdirectory(bench/spbench EXCLUDE_FROM_ALL)"
+  "# add_subdirectory(bench/spbench EXCLUDE_FROM_ALL)"
+  EIGEN_CMAKE "${EIGEN_CMAKE}")
+file(WRITE "${eigen3_SOURCE_DIR}/CMakeLists.txt" "${EIGEN_CMAKE}")
+add_subdirectory("${eigen3_SOURCE_DIR}" "${eigen3_BINARY_DIR}")
 
 # motcpp does a `find_package(Eigen3 CONFIG REQUIRED)` during its own configure step.
 # FetchContent gives us the Eigen build tree, but not an installed package prefix, so

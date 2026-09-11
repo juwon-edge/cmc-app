@@ -13,16 +13,14 @@
         "NSCameraUsageDescription": "$(PRODUCT_NAME) needs access to your camera ",
         "ITSAppUsesNonExemptEncryption": false
       },
-      "bundleIdentifier": "com.juwon33.moto-spot"
+      "bundleIdentifier": "com.juwon33.motospot"
     },
     "android": {
       "adaptiveIcon": {
         "backgroundColor": "#000000",
         "foregroundImage": "./assets/images/icon_transparent.png"
       },
-      "permissions": [
-        "android.permission.CAMERA"
-      ],
+      "permissions": ["android.permission.CAMERA"],
       "predictiveBackGestureEnabled": true,
       "package": "com.juwon33.motospot"
     },
