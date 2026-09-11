@@ -55,7 +55,7 @@ jobs:
             -DANDROID_ABI=${{ matrix.abi }} \
             -DANDROID_NATIVE_API_LEVEL=24 \
             -DANDROID_STL=c++_shared \
-            -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/install_${{ matrix.abi }} \
+            -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/build_${{ matrix.abi }}/install \
             -DBUILD_ANDROID_PROJECTS=OFF \
             -DBUILD_ANDROID_EXAMPLES=OFF \
             -DBUILD_JAVA=OFF \
@@ -102,8 +102,8 @@ jobs:
         run: |
           mkdir -p out/${{ matrix.abi }}
           # Static libs (.a) live under install/sdk/native/staticlibs/<abi>/ or install/lib
-          find opencv/install_${{ matrix.abi }} -name "*.a" -exec cp {} out/${{ matrix.abi }}/ \;
-          find opencv/install_${{ matrix.abi }} -name "*.so" -exec cp {} out/${{ matrix.abi }}/ \;
+          find opencv/build_${{ matrix.abi }}/install -name "*.a" -exec cp {} out/${{ matrix.abi }}/ \;
+          find opencv/build_${{ matrix.abi }}/install -name "*.so" -exec cp {} out/${{ matrix.abi }}/ \;
 
       - name: Upload per-ABI artifact
         uses: actions/upload-artifact@v4
@@ -117,7 +117,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: opencv-android-headers
-          path: opencv/install_${{ matrix.abi }}/sdk/native/jni/include
+          path: opencv/build_${{ matrix.abi }}/install/sdk/native/jni/include
           if-no-files-found: error
 
       - name: Upload OpenCVConfig.cmake (once, arm64 job only)
@@ -126,6 +126,6 @@ jobs:
         with:
           name: opencv-android-cmake-config
           path: |
-            opencv/install_${{ matrix.abi }}/sdk/native/jni/*.cmake
-            opencv/install_${{ matrix.abi }}/sdk/native/jni/abi-*
+            opencv/build_${{ matrix.abi }}/install/sdk/native/jni/*.cmake
+            opencv/build_${{ matrix.abi }}/install/sdk/native/jni/abi-*
           if-no-files-found: warn
